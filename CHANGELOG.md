@@ -1,5 +1,43 @@
 # Changelog
 
+## 0.2.0
+
+DSH 0.2 adaptation. Breaking against every 0.1.x host: `engines` now requires
+`dsh >=0.2.1-rc.2 <0.3.0-0` and Node `>=22.19.0`.
+
+- **The preset is a bundle patch, not a directory.** `package.json` declares
+  `"dsh": { "bundle": { "patch": "./cordis.patch.yml" } }`; the profile composes
+  `preset-codex-kernel` (the `codex-kernel` agent preset) at boot, so the old
+  `~/.dsh/.agent-presets/` copy step — and that directory itself — is gone.
+  DSH 0.2 mounts presets through `@deepseek-ai/dsh-agent-preset` rows.
+- **subagents: managed activations.** 0.1's `start` / `startContinuable` /
+  `followup` are gone. `spawn_agent` now calls
+  `subagents.startActivation({ provider, label, request, signal, delivery })`
+  (background → `delivery: 'parent'`, foreground → `'caller'`), follow-ups use
+  `subagents.sendMessage`, and `close_agent` is a real implementation of
+  `subagents.drainChildren`. `wait_agent` is implemented over
+  `subagents.waitForChildren` instead of being an honest stub.
+- **Per-role recipe providers dropped.** DSH 0.2's native `spawn` provider
+  inherits the selected agent preset, so a Codex child already carries this
+  preset's persona and tool surface; `lib/subagents.js` recipes are no longer
+  injected into the request. `exec_command`'s subagent family uses the first
+  available provider of `spawn`, then `codex-agent`.
+- **jobs: pull-ring producers.** `jobs.start` is called with
+  `owner: agent.id`, `kind: 'bash'`, and `run(job)`; output is appended through
+  `job.append(text, { channel })` on a 200 ms drain instead of the removed
+  `readOutput` hook. Reads go through `jobs.read(id, caller)` and return
+  `{ chunks, result, job }`; `list` / `wait` / `kill` take the caller session id.
+- **`exec_command` is platform-native.** POSIX hosts run `bash -lc`, Windows
+  keeps PowerShell; the hardcoded `C:\` fallback workspace root became `/`.
+- **`apply()` stays synchronous.** The mesh fallback is fired without awaiting
+  it, so tool and prompt registrations land inside the row's dispose set.
+- **Mesh fallback resolves through the profile.** `lib/ensure-mesh.js` now
+  resolves `dsh-kernel-mesh` from `profileContext.dir` (a `link:`-installed
+  plugin cannot resolve its own bare dependency), and skips the fallback when
+  the profile already lists the mesh in `startedBundles` — the previous code
+  raced the concurrent bundle start and warned about a mesh that was mounted
+  moments later.
+
 ## 0.1.8
 
 - **npm.** Preferred install is `dsh plugin --profile web add dsh-kernel-codex`. The mesh dependency is now `dsh-kernel-mesh@^0.1.8` on the npm registry.

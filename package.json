@@ -1,11 +1,12 @@
 {
   "name": "dsh-kernel-codex",
-  "version": "0.1.8",
-  "description": "Codex CLI tool surface written in DSH form, distilled from @openai/codex v0.147.0 (tool handlers unchanged from v0.146.0).",
+  "version": "0.2.0",
+  "description": "Codex CLI tool surface written in DSH form, distilled from @openai/codex v0.147.0 and adapted to the DSH 0.2 plugin contracts.",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
     ".": "./lib/index.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
     "./package.json": "./package.json"
   },
   "files": [
@@ -13,6 +14,8 @@
     "lib/ensure-mesh.js",
     "lib/system-prompt.js",
     "lib/subagents.js",
+    "lib/codex-config.js",
+    "cordis.patch.yml",
     "LICENSE",
     "README.md",
     "CHANGELOG.md",
@@ -22,7 +25,8 @@
     "AGENTS.zh-CN.md"
   ],
   "engines": {
-    "node": ">=18"
+    "node": ">=22.19.0",
+    "dsh": ">=0.2.1-rc.2 <0.3.0-0"
   },
   "license": "MIT",
   "publishConfig": {
@@ -45,6 +49,11 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/oppnc/dsh-kernel-codex.git"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
   },
   "dependencies": {
     "dsh-kernel-mesh": "^0.1.8"

@@ -31,29 +31,35 @@ Codex 自己的计划模式是 `update_plan`（它会写 `todo/write` 事件，�
    dsh plugin --profile web add dsh-kernel-codex
    ```
 
-   GitHub 也可以（`dsh plugin --profile web add github:oppnc/dsh-kernel-codex`），因为本仓库已经提交了 `lib/`。
+   GitHub 也可以（`dsh plugin --profile web add github:Tlyer233/dsh-kernel-codex`），因为本仓库已经提交了 `lib/`。
 
-   本包是普通插件（没有 `dsh.bundle` 声明），`dsh plugin` 会把它作为不激活的依赖安装——这是预期行为：下面的预设行会按名字引用它。
+   本包是 DSH 0.2 的 **bundle**：`package.json` 声明了
+   `"dsh": { "bundle": { "patch": "./cordis.patch.yml" } }`，profile 在启动时就会组合出
+   `codex-kernel` 预设。已经不需要复制预设目录——DSH 0.2 用声明式的
+   `@deepseek-ai/dsh-agent-preset` 行取代了 `~/.dsh/.agent-presets/`。
 
-2. `codex-kernel` agent 预设随 `dsh-kernel-mesh` 的 `presets/` 目录分发。把它复制到官方用户预设根目录（如果你不用 mesh，就从 mesh 仓库取预设目录）：
+2. 把 mesh 装进同一个 profile。它提供 `codex-kernel` 模型路由和 L2 子代理配方；没有它插件照样加载，但路由和配方不可用：
 
-     ```sh
-     dsh_home="${DSH_HOME:-$HOME/.dsh}"
-     cp -r "$dsh_home/profiles/web/node_modules/dsh-kernel-mesh/presets/codex-kernel" "$dsh_home/.agent-presets/"
-     ```
+   ```sh
+   dsh plugin --profile web add dsh-kernel-mesh
+   ```
 
-     预设已经包含 `codex-surface` 行；如果你自己写预设，就加上这一行（预设也会替你禁用冲突的 DSH 行 `tool-fs-search`、`tool-web`）：
+3. 重启 profile。预设选择器里会出现 **Codex kernel**，预设自己挂载 Codex 工具面：
 
    ```yaml
    - id: codex-surface
      name: dsh-kernel-codex
    ```
 
-   `send_message`、`interrupt_agent`、`list_agents` 与 DSH 原生控制工具同名：若那些行已经注册了这些名字，Codex 会跳过；否则 Codex 同名工具会交付相同的可续跑 `subagents` API。
+   预设故意不含 `tool-fs`、`tool-web`、`tool-fs-search`：Codex 工具面自带
+   `view_file` / `write_file` / `edit_file` / `glob` / `grep` / `web_search`，这些 DSH 行只会遮蔽它们。
+   `tool-jobs` 保留——jobs 控制器挂在那里。
+
+   `send_message`、`interrupt_agent`、`list_agents` 与 DSH 原生控制工具同名：若那些行已经注册了这些名字，Codex 会跳过；否则 Codex 同名工具会交付相同的 `subagents` API。
 
 ## 使用
 
-选 **codex-kernel** 预设和 **codex-kernel** 模型路由。Codex CLI 那套工具就挂在当前路由跑的模型上了。
+选 **Codex kernel** 预设，它的工具在你选的任何模型路由下都可用；只有当 mesh 找到对应厂商凭据时，**codex-kernel** 路由本身才会出现。
 
 ## 许可证
 

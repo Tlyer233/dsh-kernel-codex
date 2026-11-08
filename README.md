@@ -32,29 +32,39 @@ child with a `config.tools` whitelist.
    dsh plugin --profile web add dsh-kernel-codex
    ```
 
-   GitHub also works (`dsh plugin --profile web add github:oppnc/dsh-kernel-codex`) because `lib/` ships in the repository.
+   GitHub also works (`dsh plugin --profile web add github:Tlyer233/dsh-kernel-codex`) because `lib/` ships in the repository.
 
-   This package is a plain plugin (no `dsh.bundle` declaration), so `dsh plugin` installs it as an inactive dependency — that is expected: the preset row below references it by name.
+   This package is a DSH 0.2 **bundle**: `package.json` declares
+   `"dsh": { "bundle": { "patch": "./cordis.patch.yml" } }`, so the profile composes the
+   `codex-kernel` preset at boot. There is no preset directory to copy — DSH 0.2 replaced
+   `~/.dsh/.agent-presets/` with declarative `@deepseek-ai/dsh-agent-preset` rows.
 
-2. The `codex-kernel` agent preset ships in `dsh-kernel-mesh`'s `presets/` directory. Copy it into the official user-preset root (or, if you run without the mesh, get the preset directory from the mesh repo):
+2. Install the mesh into the same profile. It supplies the `codex-kernel` model route and the
+   L2 subagent recipes; without it the surface still loads, but routes and recipes are
+   unavailable:
 
-     ```sh
-     dsh_home="${DSH_HOME:-$HOME/.dsh}"
-     cp -r "$dsh_home/profiles/web/node_modules/dsh-kernel-mesh/presets/codex-kernel" "$dsh_home/.agent-presets/"
-     ```
+   ```sh
+   dsh plugin --profile web add dsh-kernel-mesh
+   ```
 
-     The preset already includes the `codex-surface` row; if you author your own preset, add it (the preset also disables the colliding DSH rows `tool-fs-search` and `tool-web`):
+3. Restart the profile. The preset picker lists **Codex kernel**, and the preset mounts the
+   Codex surface itself:
 
    ```yaml
    - id: codex-surface
      name: dsh-kernel-codex
    ```
 
-   `send_message`, `interrupt_agent`, and `list_agents` share names with DSH's native control tools: if those rows already registered the names, Codex skips them; otherwise the Codex-named tools deliver the same continuable `subagents` APIs.
+   `tool-fs`, `tool-web`, and `tool-fs-search` are deliberately absent: the Codex surface owns
+   `view_file` / `write_file` / `edit_file` / `glob` / `grep` / `web_search`, so those DSH rows
+   would only shadow them. `tool-jobs` stays — the jobs controller attaches there.
+
+   `send_message`, `interrupt_agent`, and `list_agents` share names with DSH's native control tools: if those rows already registered the names, Codex skips them; otherwise the Codex-named tools deliver the same `subagents` APIs.
 
 ## Usage
 
-Pick the **codex-kernel** preset and the **codex-kernel** model route. The Codex CLI tool surface is then available to whatever model that route runs.
+Pick the **Codex kernel** preset. Its tools run under whatever model route you select; the
+**codex-kernel** route itself appears once the mesh finds vendor credentials for it.
 
 ## License
 

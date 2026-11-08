@@ -1,0 +1,89 @@
+# dsh-kernel-codex bundle patch (DSH 0.2+).
+#
+# DSH 0.2 replaced directory-based agent presets (`~/.dsh/.agent-presets/`)
+# with declarative `@deepseek-ai/dsh-agent-preset` rows. This bundle therefore
+# installs the `codex-kernel` preset as a profile patch: `dsh plugin add`
+# reconciles the bundle list, and the preset row below appears in the preset
+# picker without any file copying.
+#
+# The preset is the Codex agent plane: it deliberately does NOT mount
+# `tool-fs` (the Codex surface owns view_file/write_file/edit_file), `tool-web`
+# (the Codex surface owns web_search), or `tool-fs-search` (the Codex surface
+# owns glob/grep). `tool-jobs` is required because the jobs controller attaches
+# there; the registry itself stays on the host plane.
+- insert:
+    - id: preset-codex-kernel
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: codex-kernel
+        name: Codex kernel
+        description: Codex CLI tool surface and persona from dsh-kernel-codex. Pick the codex-kernel model route to run Codex models.
+        order: 10
+        plugins:
+          - id: agent-instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config:
+              maxBytes: 65536
+
+          - id: time-context
+            name: '@deepseek-ai/dsh-time-context'
+
+          - id: tool-bash
+            name: '@deepseek-ai/dsh-tool-bash'
+            disabled: !!js process.platform === 'win32'
+
+          - id: tool-pwsh
+            name: '@deepseek-ai/dsh-tool-pwsh'
+            disabled: !!js process.platform !== 'win32'
+
+          # Codex's unified exec_command is the shell surface; keep the DSH jobs
+          # controller so background exec_command builds can be collected and
+          # stopped.
+          - id: tool-jobs
+            name: '@deepseek-ai/dsh-tool-jobs'
+
+          - id: skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+
+          - id: tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+
+          - id: command-goal
+            name: '@deepseek-ai/dsh-command-goal'
+
+          - id: tool-goal
+            name: '@deepseek-ai/dsh-tool-goal'
+
+          - id: compaction
+            name: cordis:group
+            group: true
+            isolate:
+              compaction: true
+              toolResultPruner: true
+            config:
+              - id: compaction-basic
+                name: '@deepseek-ai/dsh-compaction-basic'
+
+              - id: command-compact
+                name: '@deepseek-ai/dsh-command-compact'
+
+              - id: tool-result-pruner
+                name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+                config:
+                  thresholdChars: 8192
+                  headChars: 4096
+                  tailChars: 1024
+
+          - id: tool-ask-user
+            name: '@deepseek-ai/dsh-tool-ask-user'
+
+          - id: tool-todo
+            name: '@deepseek-ai/dsh-tool-todo'
+            config:
+              allowParallelInProgress: true
+
+          # The Codex CLI surface. `tool-fs`, `tool-fs-search`, and `tool-web`
+          # are intentionally absent: their names would shadow or duplicate the
+          # Codex file/search tools, and the Codex persona expects its own.
+          - id: codex-surface
+            name: dsh-kernel-codex
