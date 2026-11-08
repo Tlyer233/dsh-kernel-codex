@@ -1,5 +1,42 @@
 # Changelog
 
+## 0.3.0
+
+The plugin becomes a **persona**: the Codex prompt, no tools.
+
+- **30 Codex tools deleted.** `exec_command`, `write_stdin`, `apply_patch`,
+  `view_file` / `write_file` / `edit_file`, `web_search`, `view_image`,
+  `sleep`, `update_plan`, `request_user_input`, `get_context_remaining`,
+  `new_context`, the multi-agent family, the background-task tools, and the
+  glob/grep pair are all gone. `lib/index.js` now registers one
+  `deployment:persona` prompt section and nothing else.
+- **Preset renamed `codex-kernel` → `codex`** (`id: codex`, display name
+  `codex`). It is the DSH **standard** preset with the Codex persona swapped
+  in: every standard tool row — bash/pwsh, fs, fs-search, jobs, schedule,
+  skills, goal, plan mode, compaction, subagent/workflow, ask-user, todo, web,
+  present — is carried over, so all standard DSH tools stay callable.
+- **Prompt adapted to DSH tool names.** `exec_command`→`bash`,
+  `view_file`→`read`, `view_image`→`read_image`, `apply_patch`→`edit`/`write`,
+  `update_plan`→`todo_write`, `request_user_input`→`ask_user_question`,
+  `web_search`→`mcp__exa__web_search_exa`, agent family→`subagent` /
+  `send_message` / `interrupt_agent` / `list_agents`, task family→`job_list` /
+  `job_output` / `job_kill`. Codex-only workflows (`write_stdin`,
+  `request_permissions`, `get_context_remaining`, `new_context`) were removed,
+  and the commentary/final channel model became DSH's streamed progress
+  messages plus one final answer.
+- **`complete` is off by default.** The Codex persona is the only persona
+  section, while DSH's own sections (skills catalog, AGENTS.md instructions,
+  runtime context) stay in the prompt. `complete: true` restores the upstream
+  behavior (persona as the sole section, runtime context suppressed).
+  `skipPersona: true` registers nothing (kernel-mesh child mounts).
+- **Mesh dependency dropped.** `lib/ensure-mesh.js`, `lib/subagents.js`, and the
+  `dsh-kernel-mesh` dependency are removed; the package has no runtime
+  dependencies.
+- **`engines` unchanged:** `dsh >=0.2.1-rc.2 <0.3.0-0`, Node `>=22.19.0`.
+- **Smoke test rewritten** (113+ assertions) to pin the persona-only contract,
+  the absence of every Codex tool name in both prompt templates, the preset's
+  full standard-tool row list, and the manifest.
+
 ## 0.2.0
 
 DSH 0.2 adaptation. Breaking against every 0.1.x host: `engines` now requires

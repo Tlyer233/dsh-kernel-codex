@@ -2,69 +2,68 @@ English | [中文](README.zh.md)
 
 # dsh-kernel-codex
 
-DSH runs on one simple idea: **everything is a plugin**. Models, tools, subagents — plug them together however you like.
+The **Codex persona** for DSH — the prompt, and nothing else.
 
-So we did exactly that: we turned the **OpenAI Codex CLI into a DSH plugin**. The codex tool surface you already know — `exec_command`, `write_stdin`, `apply_patch`, `request_permissions`, `web_search`, `view_image`, `sleep`, `update_plan`, `request_user_input`, `get_context_remaining`, `new_context`, the multi-agent family (`spawn_agent` and friends), background-task management (`list_tasks` / `task_output` / `task_stop`), and the file primitives `view_file` / `write_file` / `edit_file` / `glob` / `grep` — 30 tools in all, now native DSH tools. Same names, same schemas, same behavior.
+This package registers exactly one system-prompt section: the upstream Codex CLI prompt, rewritten against the DSH tool surface. It ships no tools of its own. The `codex` agent preset it installs is the DSH **standard** preset with that persona swapped in, so every standard DSH tool stays callable:
 
-The payoff is simple: use the Codex CLI tool surface natively inside DSH — **no different** from opening Codex itself. Every model stays in the environment it knows best — main agent or subagent, it feels like coming home.
+```
+bash  read  write  edit  glob  grep  web_search  web_fetch
+job_list  job_output  job_kill  subagent  subagent_fork  workflow
+todo_write  ask_user_question  skill  create_goal/update_goal
+schedule_*  enter_plan_mode/exit_plan_mode  present
+```
 
-Distilled from `@openai/codex` **0.147.0** (stable). The 0.148 series is still alpha; handler names are unchanged.
+Persona distilled from `@openai/codex` **rust-v0.151.0**: `gpt_5_2_prompt.md` for pre-5.6 models, and the `models.json` `instructions_template` for `gpt-5.6-*` models.
 
-## System prompt & subagents
+## What changed in 0.3.0
 
-`lib/system-prompt.js` carries the full upstream **Codex** prompt
-(`gpt_5_2_prompt.md`; gpt-5.6 models reuse it). `apply()` registers it as the
-agent's sole system-prompt section (`complete: true` + `suppressRuntimeContext()`).
+0.2.x shipped 30 Codex-shaped tools (`exec_command`, `apply_patch`, `spawn_agent`, …). 0.3.0 deletes them; the persona is the whole plugin. The prompt now teaches the DSH tools instead:
 
-Codex's own plan mode is `update_plan` (it writes `todo/write` events so the plan
-renders through DSH's `todos` projection); there is no DSH `enter_plan_mode` /
-`exit_plan_mode` pair.
+| Codex tool | DSH tool the prompt now teaches |
+|---|---|
+| `exec_command` | `bash` |
+| `view_file` | `read` |
+| `view_image` | `read_image` |
+| `apply_patch` | `edit` / `write` |
+| `update_plan` | `todo_write` |
+| `request_user_input` | `ask_user_question` |
+| `web_search` | `mcp__exa__web_search_exa` (Exa MCP) |
+| `spawn_agent` / `send_input` / `wait` / `close_agent` | `subagent` / `send_message` / `interrupt_agent` / `list_agents` |
+| `list_tasks` / `task_output` / `task_stop` | `job_list` / `job_output` / `job_kill` |
 
-`lib/subagents.js` ships `codex-agent`, `codex-explore`, and `codex-worker` (Codex's built-in
-`default`, `explorer`, and `worker` roles). The mesh loads them and mounts this plugin on each
-child with a `config.tools` whitelist.
+Workflows DSH has no equivalent for — `write_stdin`, `request_permissions`, `get_context_remaining`, `new_context` — were removed from the prompt. The Codex "commentary / final channel" model was replaced with DSH's streamed progress messages plus one final answer.
 
 ## Install
 
-1. Install the plugin into your profile with the official plugin command:
+```sh
+dsh plugin --profile web add dsh-kernel-codex
+```
 
-   ```sh
-   dsh plugin --profile web add dsh-kernel-codex
-   ```
+GitHub also works (`dsh plugin --profile web add github:Tlyer233/dsh-kernel-codex`) because `lib/` ships in the repository.
 
-   GitHub also works (`dsh plugin --profile web add github:Tlyer233/dsh-kernel-codex`) because `lib/` ships in the repository.
+This package is a DSH 0.2 **bundle**: `package.json` declares
+`"dsh": { "bundle": { "patch": "./cordis.patch.yml" } }`, so the profile composes the `codex`
+preset at boot. There is no preset directory to copy — DSH 0.2 replaced
+`~/.dsh/.agent-presets/` with declarative `@deepseek-ai/dsh-agent-preset` rows.
 
-   This package is a DSH 0.2 **bundle**: `package.json` declares
-   `"dsh": { "bundle": { "patch": "./cordis.patch.yml" } }`, so the profile composes the
-   `codex-kernel` preset at boot. There is no preset directory to copy — DSH 0.2 replaced
-   `~/.dsh/.agent-presets/` with declarative `@deepseek-ai/dsh-agent-preset` rows.
+Restart the profile afterwards. The preset picker lists **codex**.
 
-2. Install the mesh into the same profile. It supplies the `codex-kernel` model route and the
-   L2 subagent recipes; without it the surface still loads, but routes and recipes are
-   unavailable:
+## How the persona is registered
 
-   ```sh
-   dsh plugin --profile web add dsh-kernel-mesh
-   ```
+`lib/index.js` contributes one section to the prompt registry:
 
-3. Restart the profile. The preset picker lists **Codex kernel**, and the preset mounts the
-   Codex surface itself:
+```js
+systemPrompt.section({
+  name: 'deployment:persona',
+  order: 0,
+  text: personaForModel(readCodexConfigModel()),
+  complete: false,
+})
+```
 
-   ```yaml
-   - id: codex-surface
-     name: dsh-kernel-codex
-   ```
-
-   `tool-fs`, `tool-web`, and `tool-fs-search` are deliberately absent: the Codex surface owns
-   `view_file` / `write_file` / `edit_file` / `glob` / `grep` / `web_search`, so those DSH rows
-   would only shadow them. `tool-jobs` stays — the jobs controller attaches there.
-
-   `send_message`, `interrupt_agent`, and `list_agents` share names with DSH's native control tools: if those rows already registered the names, Codex skips them; otherwise the Codex-named tools deliver the same `subagents` APIs.
-
-## Usage
-
-Pick the **Codex kernel** preset. Its tools run under whatever model route you select; the
-**codex-kernel** route itself appears once the mesh finds vendor credentials for it.
+- `complete: false` (default) keeps DSH's own sections — the `available_skills` catalog, AGENTS.md instructions, and the runtime-context snapshot — around the Codex persona. The prompt is adapted *to* DSH, not a replacement of it.
+- `complete: true` restores upstream Codex behavior: the persona becomes the sole system-prompt section and the runtime-context snapshot is dropped.
+- `persona` overrides the text outright; `skipPersona: true` makes the row register nothing (used when a kernel mesh mounts the plugin on a child that already has a persona).
 
 ## License
 
