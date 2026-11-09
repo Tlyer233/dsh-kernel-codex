@@ -104,6 +104,21 @@ Both templates must carry a `## bash — hard rules` section that pins:
   (format may vary; the 30s cadence and the "only when idle" condition may not);
 - `job_output` / `job_kill` / `job_list` for collection.
 
+### Reply rules
+
+Both templates must carry a `# Replying to the user` section stating that the
+user has a severe reading disability, and pinning:
+
+- no preamble and no restating of the question;
+- every sentence carries its own subject, so any sentence reads standalone;
+- an ASCII diagram whenever the content is structure, order, flow, or a mapping;
+- correct the user in one line with a cited check when the user is wrong;
+- disagree when the evidence disagrees, and never flip without new evidence.
+
+The prompts are English-only. The single allowed CJK string is the progress
+example `进度:#####   5/10 当前正在进行 attention kernel 的编译`; the smoke test
+removes exactly that string and fails on any other Chinese text.
+
 ## Configuration
 
 | key | default | meaning |

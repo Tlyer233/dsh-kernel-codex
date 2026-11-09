@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.2
+
+- **Reply rules in both personas.** A new `# Replying to the user` section
+  states that the user has a severe reading disability and pins five rules:
+  no preamble; every sentence carries its own subject; ASCII diagrams before
+  prose; correct the user in one line with a cited check when the user is
+  wrong; disagree when the evidence disagrees.
+- **English-only personas.** Both templates are English, apart from the single
+  progress example `进度:#####   5/10 当前正在进行 attention kernel 的编译`.
+  The smoke test allows that one string and fails on any other CJK text.
+
 ## 0.3.1
 
 - **bash hard rules in both personas.** The prompt now tells the agent to call

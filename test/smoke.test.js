@@ -1,4 +1,4 @@
-// Smoke test for the persona-only plugin (0.3.1).
+// Smoke test for the persona-only plugin (0.3.2).
 //
 // The plugin registers ONE system-prompt section and nothing else; this test
 // pins that contract, the DSH-adapted prompt text, the bundle preset that
@@ -99,6 +99,18 @@ function main() {
     ok(text.includes('30 seconds'), label + ' prompt sets the 30s progress cadence')
     ok(text.includes('nothing else to do'), label + ' prompt only reports when no other work is parallel')
     ok(text.includes('进度:#####'), label + ' prompt shows the ASCII progress line')
+
+    // reply rules: terse, subject in every sentence, ASCII first, correct the user
+    ok(text.includes('# Replying to the user'), label + ' prompt carries the reply rules')
+    ok(text.includes('severe reading disability'), label + ' prompt states the reader constraint')
+    ok(text.includes('Give every sentence a subject'), label + ' prompt demands a subject per sentence')
+    ok(text.includes('Prefer ASCII diagrams'), label + ' prompt prefers ASCII diagrams')
+    ok(text.includes('The user can be wrong'), label + ' prompt allows correcting the user')
+    ok(text.includes('Disagree when the evidence disagrees'), label + ' prompt allows pushback')
+
+    // English-only personas: the progress example is the single allowed CJK string
+    const stripped = text.replace('进度:#####   5/10 当前正在进行 attention kernel 的编译', '')
+    ok(!/[\u4e00-\u9fff]/.test(stripped), label + ' prompt is free of other Chinese text')
   }
 
   // ---- model-aware template selection ----
@@ -177,7 +189,7 @@ function main() {
   // ---- package manifest ----
   {
     const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'))
-    eq(pkg.version, '0.3.1', 'package version')
+    eq(pkg.version, '0.3.2', 'package version')
     eq(pkg.dependencies, undefined, 'no runtime dependency (mesh dropped)')
     ok(pkg.files.includes('lib/index.js'), 'package ships lib/index.js')
     ok(pkg.files.includes('lib/system-prompt.js'), 'package ships lib/system-prompt.js')
