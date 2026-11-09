@@ -1,6 +1,6 @@
 {
   "name": "dsh-kernel-codex",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "The Codex CLI persona as a DSH agent preset: one system-prompt section, adapted to the DSH tool surface, with no tools of its own.",
   "type": "module",
   "main": "lib/index.js",

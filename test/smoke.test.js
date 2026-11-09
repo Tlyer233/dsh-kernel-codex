@@ -90,11 +90,13 @@ function main() {
     ok(!text.includes('commentary` channel'), label + ' prompt has no Codex channel model')
     ok(text.includes('mcp__exa__web_search_exa'), label + ' prompt routes web search to the Exa MCP tool')
 
-    // bash hard rules: background-first, no real timeout, no idle wait, 30s progress
+    // bash hard rules: 35s foreground grace, long commands background, no idle wait
     ok(text.includes('## bash — hard rules'), label + ' prompt carries the bash hard rules')
-    ok(text.includes('run_in_background: true'), label + ' prompt forces run_in_background: true')
+    ok(text.includes('Short commands stay in the foreground'), label + ' prompt keeps short commands in the foreground')
+    ok(text.includes('run_in_background: true'), label + ' prompt sends long commands to the background')
     ok(text.includes('timeoutMs'), label + ' prompt names the real timeoutMs parameter')
-    ok(text.includes('write exactly \\`1\\`') || text.includes('write exactly `1`'), label + ' prompt caps timeoutMs at 1')
+    ok(text.includes('timeoutMs` above 35000') || text.includes('timeoutMs\\` above 35000'), label + ' prompt caps timeoutMs at 35000')
+    ok(text.includes('promoted to a background job'), label + ' prompt states the 35s promotion')
     ok(text.includes('Never idle-wait'), label + ' prompt forbids idle waiting')
     ok(text.includes('30 seconds'), label + ' prompt sets the 30s progress cadence')
     ok(text.includes('nothing else to do'), label + ' prompt only reports when no other work is parallel')
@@ -195,7 +197,7 @@ function main() {
   // ---- package manifest ----
   {
     const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'))
-    eq(pkg.version, '0.3.3', 'package version')
+    eq(pkg.version, '0.3.4', 'package version')
     eq(pkg.dependencies, undefined, 'no runtime dependency (mesh dropped)')
     ok(pkg.files.includes('lib/index.js'), 'package ships lib/index.js')
     ok(pkg.files.includes('lib/system-prompt.js'), 'package ships lib/system-prompt.js')

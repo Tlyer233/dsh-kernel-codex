@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.4
+
+- **bash: 35-second foreground grace.** Short commands (expected under 35
+  seconds) run in the foreground again; builds, training runs, and anything
+  longer must set `run_in_background: true`. A foreground command still running
+  at 35 seconds is promoted to a background job automatically, and `timeoutMs`
+  is capped at 35000. The old "always background, `timeoutMs` exactly 1" rule
+  is gone.
+- While a job runs the agent does other work in parallel and reports progress
+  every 30 seconds only when nothing else can proceed.
+
 ## 0.3.3
 
 - **Exa search is a hard rule now.** Both personas carry
