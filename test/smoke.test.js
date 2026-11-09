@@ -1,4 +1,4 @@
-// Smoke test for the persona-only plugin (0.3.0).
+// Smoke test for the persona-only plugin (0.3.1).
 //
 // The plugin registers ONE system-prompt section and nothing else; this test
 // pins that contract, the DSH-adapted prompt text, the bundle preset that
@@ -89,6 +89,16 @@ function main() {
     for (const tool of CODEX_TOOL_NAMES) ok(!text.includes(tool), label + ' prompt drops the Codex tool ' + tool)
     ok(!text.includes('commentary` channel'), label + ' prompt has no Codex channel model')
     ok(text.includes('mcp__exa__web_search_exa'), label + ' prompt routes web search to the Exa MCP tool')
+
+    // bash hard rules: background-first, no real timeout, no idle wait, 30s progress
+    ok(text.includes('## bash — hard rules'), label + ' prompt carries the bash hard rules')
+    ok(text.includes('run_in_background: true'), label + ' prompt forces run_in_background: true')
+    ok(text.includes('timeoutMs'), label + ' prompt names the real timeoutMs parameter')
+    ok(text.includes('write exactly \\`1\\`') || text.includes('write exactly `1`'), label + ' prompt caps timeoutMs at 1')
+    ok(text.includes('Never idle-wait'), label + ' prompt forbids idle waiting')
+    ok(text.includes('30 seconds'), label + ' prompt sets the 30s progress cadence')
+    ok(text.includes('nothing else to do'), label + ' prompt only reports when no other work is parallel')
+    ok(text.includes('进度:#####'), label + ' prompt shows the ASCII progress line')
   }
 
   // ---- model-aware template selection ----
@@ -167,7 +177,7 @@ function main() {
   // ---- package manifest ----
   {
     const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'))
-    eq(pkg.version, '0.3.0', 'package version')
+    eq(pkg.version, '0.3.1', 'package version')
     eq(pkg.dependencies, undefined, 'no runtime dependency (mesh dropped)')
     ok(pkg.files.includes('lib/index.js'), 'package ships lib/index.js')
     ok(pkg.files.includes('lib/system-prompt.js'), 'package ships lib/system-prompt.js')

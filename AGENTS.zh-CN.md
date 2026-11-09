@@ -69,6 +69,18 @@ export function apply(ctx, config = {}) {
 
 两份模板里都必须出现：`bash`、`read`、`write`、`edit`、`glob`、`grep`、`todo_write`、`ask_user_question`、`subagent`、`job_list` / `job_output` / `job_kill`、`mcp__exa__web_search_exa`、`skill`。
 
+### bash 硬性规则
+
+两份模板都必须带 `## bash — hard rules` 段，锁死：
+
+- 每次调用都 `run_in_background: true`——前台阻塞等待就是 bug；
+- 不填真实超时：`timeoutMs` 省略，或只写 `1`；
+- 不允许空等：后台任务一启动就去干并行的活；
+- **只有在没有其他可并行工作时**，才每 30 秒报一次进度，一行，形如
+  `进度:#####   5/10 当前正在进行 attention kernel 的编译`
+  （格式可变，30 秒节奏和“仅无并行时”这个条件不可变）；
+- 取输出用 `job_output`，停用 `job_kill`，列表用 `job_list`。
+
 ## 配置
 
 | 键 | 默认 | 含义 |

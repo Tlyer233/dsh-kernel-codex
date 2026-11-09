@@ -35,11 +35,16 @@ DSH 没有对应物的流程——`write_stdin`、`request_permissions`、`get_c
 
 ## 安装
 
+**从 GitHub 装**——0.3.0 目前只在 GitHub 上：
+
 ```sh
-dsh plugin --profile web add dsh-kernel-codex
+dsh plugin --profile web add github:Tlyer233/dsh-kernel-codex
 ```
 
-GitHub 也可以（`dsh plugin --profile web add github:Tlyer233/dsh-kernel-codex`），因为本仓库已经提交了 `lib/`。
+npm 上的 `dsh-kernel-codex` 还停在 **0.1.8**，那是带 30 个 Codex 形态工具的旧版（见「0.3.0 改了什么」），
+所以不带 `github:` 的 `dsh plugin --profile web add dsh-kernel-codex` 装到的是旧工具插件，不是这个人设。
+本仓库已提交 `lib/`，`github:` 才能直接安装；GitHub 直连不通时给命令套上代理：
+`https_proxy=http://127.0.0.1:<代理端口> dsh plugin --profile web add github:Tlyer233/dsh-kernel-codex`。
 
 本包是 DSH 0.2 的 **bundle**：`package.json` 声明了
 `"dsh": { "bundle": { "patch": "./cordis.patch.yml" } }`，profile 启动时就会组合出 `codex`

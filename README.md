@@ -35,11 +35,18 @@ Workflows DSH has no equivalent for — `write_stdin`, `request_permissions`, `g
 
 ## Install
 
+Install **from GitHub** — 0.3.0 only exists there:
+
 ```sh
-dsh plugin --profile web add dsh-kernel-codex
+dsh plugin --profile web add github:Tlyer233/dsh-kernel-codex
 ```
 
-GitHub also works (`dsh plugin --profile web add github:Tlyer233/dsh-kernel-codex`) because `lib/` ships in the repository.
+The npm release is still **0.1.8**, the build that ships the 30 Codex-shaped tools (see
+"What changed in 0.3.0"), so the bare name — `dsh plugin --profile web add dsh-kernel-codex` —
+installs the old tool plugin, not this persona. `lib/` is committed to the repository, which is
+what lets the `github:` specifier install it directly. When GitHub is not reachable without a
+proxy, put the install behind one:
+`https_proxy=http://127.0.0.1:<port> dsh plugin --profile web add github:Tlyer233/dsh-kernel-codex`.
 
 This package is a DSH 0.2 **bundle**: `package.json` declares
 `"dsh": { "bundle": { "patch": "./cordis.patch.yml" } }`, so the profile composes the `codex`

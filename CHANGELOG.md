@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.1
+
+- **bash hard rules in both personas.** The prompt now tells the agent to call
+  `bash` with `run_in_background: true` always, to omit `timeoutMs` (or write
+  exactly `1`), never to block the foreground, and — only when nothing else can
+  run in parallel — to report a one-line progress update every 30 seconds
+  (`进度:#####   5/10 当前正在进行 attention kernel 的编译`, format may vary).
+  Output is collected with `job_output`, stopped with `job_kill`, listed with
+  `job_list`. The smoke test pins every one of these phrases in both templates.
+
 ## 0.3.0
 
 The plugin becomes a **persona**: the Codex prompt, no tools.

@@ -92,6 +92,18 @@ Required in both templates: `bash`, `read`, `write`, `edit`, `glob`, `grep`,
 `todo_write`, `ask_user_question`, `subagent`, `job_list` / `job_output` /
 `job_kill`, `mcp__exa__web_search_exa`, `skill`.
 
+### bash hard rules
+
+Both templates must carry a `## bash — hard rules` section that pins:
+
+- `run_in_background: true` for every call — a foreground blocking call is a bug;
+- no real `timeoutMs`: omit it, or write exactly `1`;
+- no idle waiting: the moment a job starts, go do parallel work;
+- progress once every 30 seconds **only when nothing else can run in parallel**,
+  one line, shape `进度:#####   5/10 当前正在进行 attention kernel 的编译`
+  (format may vary; the 30s cadence and the "only when idle" condition may not);
+- `job_output` / `job_kill` / `job_list` for collection.
+
 ## Configuration
 
 | key | default | meaning |
