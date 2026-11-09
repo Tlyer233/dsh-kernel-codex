@@ -96,9 +96,12 @@ Required in both templates: `bash`, `read`, `write`, `edit`, `glob`, `grep`,
 
 Both templates must carry a `## bash — hard rules` section that pins:
 
-- `run_in_background: true` for every call — a foreground blocking call is a bug;
-- no real `timeoutMs`: omit it, or write exactly `1`;
-- no idle waiting: the moment a job starts, go do parallel work;
+- short commands (expected under 35 s) run in the foreground — no
+  `run_in_background`, no `timeoutMs`;
+- long commands set `run_in_background: true` and return a job id immediately;
+- `timeoutMs` is capped at 35000, and a foreground command still running at
+  35 s is promoted to a background job automatically;
+- no idle waiting: while a job runs, do parallel work first;
 - progress once every 30 seconds **only when nothing else can run in parallel**,
   one line, shape `进度:#####   5/10 当前正在进行 attention kernel 的编译`
   (format may vary; the 30s cadence and the "only when idle" condition may not);
