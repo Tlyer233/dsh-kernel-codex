@@ -1,4 +1,4 @@
-// Smoke test for the persona-only plugin (0.3.2).
+// Smoke test for the persona-only plugin (0.3.3).
 //
 // The plugin registers ONE system-prompt section and nothing else; this test
 // pins that contract, the DSH-adapted prompt text, the bundle preset that
@@ -108,6 +108,12 @@ function main() {
     ok(text.includes('The user can be wrong'), label + ' prompt allows correcting the user')
     ok(text.includes('Disagree when the evidence disagrees'), label + ' prompt allows pushback')
 
+    // exa search first: mandatory the moment the user reports a problem
+    ok(text.includes('## Search first — non-negotiable'), label + ' prompt carries the mandatory search rule')
+    ok(text.includes('reports a problem'), label + ' prompt triggers search on reported problems')
+    ok(text.includes('before you form a theory'), label + ' prompt forbids theorising before searching')
+    ok(text.includes('read the returned sources'), label + ' prompt requires reading the sources')
+
     // English-only personas: the progress example is the single allowed CJK string
     const stripped = text.replace('进度:#####   5/10 当前正在进行 attention kernel 的编译', '')
     ok(!/[\u4e00-\u9fff]/.test(stripped), label + ' prompt is free of other Chinese text')
@@ -189,7 +195,7 @@ function main() {
   // ---- package manifest ----
   {
     const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'))
-    eq(pkg.version, '0.3.2', 'package version')
+    eq(pkg.version, '0.3.3', 'package version')
     eq(pkg.dependencies, undefined, 'no runtime dependency (mesh dropped)')
     ok(pkg.files.includes('lib/index.js'), 'package ships lib/index.js')
     ok(pkg.files.includes('lib/system-prompt.js'), 'package ships lib/system-prompt.js')

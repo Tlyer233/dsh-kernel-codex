@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.3
+
+- **Exa search is a hard rule now.** Both personas carry
+  `## Search first — non-negotiable`: when the user reports a problem, an
+  error, a symptom, or any uncertainty about how a tool, an API, or an
+  environment behaves, the agent searches with `mcp__exa__web_search_exa`
+  before forming a theory, reads the returned sources, and cites them in one
+  line. Probing the environment first is forbidden. `web_search` is the stated
+  fallback when the Exa row is not mounted.
+
 ## 0.3.2
 
 - **Reply rules in both personas.** A new `# Replying to the user` section

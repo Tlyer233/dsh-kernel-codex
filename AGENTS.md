@@ -119,6 +119,17 @@ The prompts are English-only. The single allowed CJK string is the progress
 example `进度:#####   5/10 当前正在进行 attention kernel 的编译`; the smoke test
 removes exactly that string and fails on any other Chinese text.
 
+### Search-first rule
+
+Both templates must carry a `## Search first — non-negotiable` section:
+
+- a reported problem, error, symptom, or uncertainty triggers
+  `mcp__exa__web_search_exa` **before** any theory or local probe;
+- the agent reads the returned sources and cites them in one line;
+- the search is skipped only when the fact is already in the conversation or a
+  file the agent just read;
+- `web_search` is the fallback when the Exa row is not mounted.
+
 ## Configuration
 
 | key | default | meaning |
