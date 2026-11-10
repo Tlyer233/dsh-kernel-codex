@@ -192,12 +192,17 @@ function main() {
     for (const row of standardRows) ok(preset.includes(row), 'preset carries the standard row ' + row)
     ok(!preset.includes('codex-surface'), 'preset no longer mounts a Codex tool surface')
     ok(!preset.includes('kernelMesh'), 'preset has no mesh dependency')
+    // DSH 0.2.2 removed the ./list-agents subpath and renamed the subagent config keys.
+    ok(!preset.includes('tool-subagent-control/list-agents'), 'preset drops the removed list-agents row')
+    ok(preset.includes('modelSelection: true'), 'preset uses the 0.2.2 modelSelection key')
+    ok(!preset.includes('modelSelectionSettings'), 'preset drops the 0.2.1 modelSelectionSettings key')
+    ok(preset.includes('applyPatch: false'), 'preset pins tool-fs applyPatch off')
   }
 
   // ---- package manifest ----
   {
     const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'))
-    eq(pkg.version, '0.3.4', 'package version')
+    eq(pkg.version, '0.3.5', 'package version')
     eq(pkg.dependencies, undefined, 'no runtime dependency (mesh dropped)')
     ok(pkg.files.includes('lib/index.js'), 'package ships lib/index.js')
     ok(pkg.files.includes('lib/system-prompt.js'), 'package ships lib/system-prompt.js')

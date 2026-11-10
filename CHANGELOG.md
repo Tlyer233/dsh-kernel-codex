@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.5
+
+- **DSH 0.2.2 preset rows.** 0.2.2 removed the
+  `@deepseek-ai/dsh-tool-subagent-control/list-agents` subpath, so that row is
+  gone and `list_agents` comes from the control row itself.
+  `dsh-tool-subagent` config keys were renamed: `modelSelectionSettings` →
+  `modelSelection`, plus the new `modelDiscovery`. `tool-fs` pins
+  `applyPatch: false`. Without this the `codex` preset fails activation with
+  "tool-subagent-list-agents: never started".
+
 ## 0.3.4
 
 - **bash: 35-second foreground grace.** Short commands (expected under 35
